@@ -4,11 +4,7 @@
 # University Of California, Irvine
 # Authors: Akshat Patel, Teja Kolli, Prakul Agarwal
 
-# Imports
-import random
-
-# Global Variables
-board_size = 8
+# Othello game skeleton
 
 
 class Othello:
@@ -248,39 +244,3 @@ class Othello:
             string += '\n'
         print(string)
 
-#
-#
-# GAME TESTING CODE
-#
-#
-
-p1w = 0
-p2w = 0
-dr = 0
-
-for i in range(100):
-    o = Othello(board_size)
-    p = 1
-    while True:
-        v_m = o.valid_moves(p)
-        if len(v_m) > 0:
-            o.put(random.choice(v_m), p)
-        # o.board.draw_with_valid_moves(p)
-        a = o.is_game_over(p)
-        p *= -1
-        if a != None:
-            if a == 0:
-                dr += 1
-                # print 'Game draw!'
-            else:
-                if a == 1:
-                    p1w += 1
-                else:
-                    p2w += 1
-                    # print 'Player ' + str(a) + ' won! ' + str(i)
-            break
-
-print '\n\n================\nFinal scores: '
-print 'Player 1 won ' + str(p1w) + ' times. '
-print 'Player 2 won ' + str(p2w) + ' times. '
-print 'Game draw ' + str(dr) + ' times. '
