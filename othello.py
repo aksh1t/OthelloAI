@@ -11,7 +11,7 @@ import random
 board_size = 8
 
 
-class Board:
+class Othello:
     def __init__(self, size):
         # Setting up size of the board
         self.__size = size if size > 3 else 4
@@ -34,10 +34,10 @@ class Board:
         self.__score = {1: 2, -1: 2}
 
     def put(self, move, player):
-        """ Places the disc at co-ordinates given by move. Assumes move to be valid
+        """ Places the disc at co-ordinates given by move. Assumes the move to be valid.
         :param move: tuple having x and y co-ordinates where you want to put the disc
         :param player: value should be 1 for player 1 and -1 for player 2
-        :return: 0 for draw, player value if any player won, None otherwise
+        :return: Nothing
         """
         # Optional Validations
         # --------------------
@@ -118,6 +118,13 @@ class Board:
                     if self.__board[md[0]][md[1]] == player:
                         break
 
+    def is_game_over(self, player):
+        """ Function to check if the game is over.
+        :param player: The current player
+        :return: 1 for player 1 win, -1 for player 2 win, 0 for draw, None otherwise
+        """
+        opp = player * -1
+
         # Check for opponent win!
         if self.__score[player] == 0:
             return opp
@@ -135,12 +142,20 @@ class Board:
             else:
                 return 0
 
-        return None
+        # No player can make a valid move
+        if len(self.valid_moves(player)) == 0:
+            if len(self.valid_moves(opp)) == 0:
+                if self.__score[player] > self.__score[opp]:
+                    return player
+                elif self.__score[player] < self.__score[opp]:
+                    return opp
+                else:
+                    return 0
 
     def valid_moves(self, player):
-        """ Returns a list of valid moves for the player, -1 if an error
-        :param player:
-        :return:
+        """ Returns a list of valid moves for the player, -1 if an error.
+        :param player: The current player
+        :return: Returns a list of valid moves for the player or -1 if player is invalid
         """
         if not (player == 1 or player == -1):
             return -1
@@ -149,18 +164,18 @@ class Board:
         moves = []
 
         # Looping through each spot on the board
-        for i in self.__rsize:
-            for j in self.__rsize:
+        for row in self.__rsize:
+            for col in self.__rsize:
 
                 # Skip if the spot is not empty
-                if not self.__board[i][j] == 0:
+                if not self.__board[row][col] == 0:
                     continue
 
                 # Looking in all the directions
                 for d in self.__dir:
 
                     # Generates the next move in direction
-                    md = self.__move_in_dir((i, j), d)
+                    md = self.__move_in_dir((row, col), d)
 
                     # Checks for validity of generated move
                     if not self.__valid_move(md):
@@ -195,65 +210,77 @@ class Board:
 
                     # Found a valid position, so append this position to the list of valid moves
                     if found_valid_position:
-                        moves.append((i, j))
+                        moves.append((row, col))
                         break
 
         # Returning list of moves
         return moves
 
     def draw(self):
-        s = ''
-        for i in self.__board:
-            for j in i:
-                if j == 0:
-                    s += '. '
+        """ Prints the board.
+        :return: Nothing
+        """
+        valid_move_list = ''
+        for row in self.__board:
+            for disc in row:
+                if disc == 0:
+                    valid_move_list += '. '
                 else:
-                    s += '● ' if j == 1 else '○ '
-            s += '\n'
-        print(s)
+                    valid_move_list += '● ' if disc == 1 else '○ '
+            valid_move_list += '\n'
+        print(valid_move_list)
 
     def draw_with_valid_moves(self, player):
-        v_m = self.valid_moves(player)
-        s = ''
-        for a, i in enumerate(self.__board):
-            for b, j in enumerate(i):
-                if (a, b) in v_m:
-                    s += '▵ '
-                elif j == 0:
-                    s += '. '
+        """ Prints the board and also shows the valid moves for one player.
+        :param player: Player for whom we need to show the valid moves
+        :return: Nothing
+        """
+        valid_move_list = self.valid_moves(player)
+        string = ''
+        for row, row_element in enumerate(self.__board):
+            for col, disc in enumerate(row_element):
+                if (row, col) in valid_move_list:
+                    string += '▵ '
+                elif disc == 0:
+                    string += '. '
                 else:
-                    s += '● ' if j == 1 else '○ '
-            s += '\n'
-        print(s)
+                    string += '● ' if disc == 1 else '○ '
+            string += '\n'
+        print(string)
 
+#
+#
+# GAME TESTING CODE
+#
+#
 
-class Othello:
-    def __init__(self):
-        self.board = Board(board_size)
+p1w = 0
+p2w = 0
+dr = 0
 
-
-o = Othello()
-p = 1
-o.board.draw_with_valid_moves(p)
-skip = False
-while True:
-    v_m = o.board.valid_moves(p)
-    a = None
-    if len(v_m) > 0:
-        a = o.board.put(random.choice(v_m), p)
-    else:
-        if skip:
-            o.board.draw_with_valid_moves(p)
+for i in range(100):
+    o = Othello(board_size)
+    p = 1
+    while True:
+        v_m = o.valid_moves(p)
+        if len(v_m) > 0:
+            o.put(random.choice(v_m), p)
+        # o.board.draw_with_valid_moves(p)
+        a = o.is_game_over(p)
+        p *= -1
+        if a != None:
+            if a == 0:
+                dr += 1
+                # print 'Game draw!'
+            else:
+                if a == 1:
+                    p1w += 1
+                else:
+                    p2w += 1
+                    # print 'Player ' + str(a) + ' won! ' + str(i)
             break
-        skip = True
-    p *= -1
-    o.board.draw_with_valid_moves(p)
 
-    if a:
-        if a == 0:
-            print 'Game draw!'
-        else:
-            print 'Player ' + str(a) + ' won!'
-        break
-
-
+print '\n\n================\nFinal scores: '
+print 'Player 1 won ' + str(p1w) + ' times. '
+print 'Player 2 won ' + str(p2w) + ' times. '
+print 'Game draw ' + str(dr) + ' times. '
