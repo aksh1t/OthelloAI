@@ -4,8 +4,12 @@
 # University Of California, Irvine
 # Authors: Akshat Patel, Teja Kolli, Prakul Agarwal
 
+# Imports
+import random
+
 # Global Variables
 board_size = 8
+
 
 class Board:
     def __init__(self, size):
@@ -228,17 +232,20 @@ class Othello:
         self.board = Board(board_size)
 
 
-import random
-
 o = Othello()
 p = 1
 o.board.draw_with_valid_moves(p)
-
+skip = False
 while True:
     v_m = o.board.valid_moves(p)
     a = None
     if len(v_m) > 0:
         a = o.board.put(random.choice(v_m), p)
+    else:
+        if skip:
+            o.board.draw_with_valid_moves(p)
+            break
+        skip = True
     p *= -1
     o.board.draw_with_valid_moves(p)
 
@@ -248,3 +255,5 @@ while True:
         else:
             print 'Player ' + str(a) + ' won!'
         break
+
+
